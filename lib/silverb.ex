@@ -24,7 +24,7 @@ defmodule Silverb do
 	Enum.each("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term, 
 		fn(mod) ->
 			case :xref.m(mod) do
-				[deprecated: [], undefined: [], unused: []] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
+				[deprecated: [], undefined: [], unused: _] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
 				some -> raise "#{__MODULE__} : found errors #{inspect some}"
 			end
 			case mod.silverb do
