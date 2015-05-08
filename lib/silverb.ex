@@ -54,25 +54,25 @@ defmodule Silverb do
   defp get_checks(lst) do
 	Enum.reduce(lst, %{attrs: nil, checks: nil}, 
       fn
-	  {this_attr, this_expr}, %{attrs: nil, checks: nil} ->
-	  	this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
+	  {this_attr = <<"@",_::binary>>, this_expr}, %{attrs: nil, checks: nil} ->
+	  	this_value = Code.eval_quoted(this_expr) |> elem(0)
         %{
           attrs:  quote location: :keep do
-                    unquote(this_attr)
+                    unquote(Code.string_to_quoted!("#{this_attr} #{inspect this_value}"))
                   end,
           checks: quote location: :keep do
-          			(unquote(this_value) == unquote(this_expr))
+          			(unquote(Macro.escape(this_value)) == unquote(this_expr))
                   end
         }
-      {this_attr, this_expr}, %{attrs: attrs, checks: checks} ->
-        this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
+      {this_attr = <<"@",_::binary>>, this_expr}, %{attrs: attrs, checks: checks} ->
+        this_value = Code.eval_quoted(this_expr) |> elem(0)
         %{
           attrs:  quote location: :keep do
           			unquote(attrs)
-                    unquote(this_attr)
+                    unquote(Code.string_to_quoted!("#{this_attr} #{inspect this_value}"))
                   end,
           checks: quote location: :keep do
-          			unquote(checks) and (unquote(this_value) == unquote(this_expr))
+          			unquote(checks) and (unquote(Macro.escape(this_value)) == unquote(this_expr))
                   end
         }
       end)
@@ -138,8 +138,8 @@ end
 defmodule Silverb.OnCompile do
 	@oncompile Silverb.maybe_create_priv
 	use Silverb, [ 
-					{@canged(:application.get_env(:silverb, :some)), :application.get_env(:silverb, :some)},
-					{@good(%{a: 1}), %{a: 1}} 
+					{"@canged", :application.get_env(:silverb, :some)},
+					{"@good", %{a: 1}} 
 				 ]
   	def test, do: {@canged, @good}
 end
