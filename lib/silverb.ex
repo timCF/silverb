@@ -34,11 +34,25 @@ defmodule Silverb do
   #	in client side (modules)
   #
 
-  defmacro __using__(_) do
-	quote location: :keep do
-		@silverb Silverb.send_data(__MODULE__)
-	end
+  defmacro __using__(lst) do
+    %{attrs: attrs, checks: checks} = Enum.reduce(lst, %{attrs: quote do end, checks: []}, 
+      fn(expr, %{attrs: attrs, checks: checks}) ->
+        %{
+          attrs:  quote do
+                    unquote(expr)
+                    #unquote(attr)(unquote(expr))
+                  end,
+          checks: []
+        }
+      end)
+  	res = quote location: :keep do
+      unquote(attrs)
+  		@silverb Silverb.send_data(__MODULE__)
+  	end
+    IO.puts Macro.to_string(res)
+    res
   end
+
 
   def send_data(mod) do
   	try do
@@ -98,5 +112,6 @@ end
 
 defmodule Silverb.OnCompile do
 	@oncompile Silverb.maybe_create_priv
-	use Silverb
+	use Silverb, [ @example2(Enum.count([])) ]
+  def test, do: @example2
 end
