@@ -43,7 +43,7 @@ defmodule Silverb do
     body = 	case checks do
 				nil -> quote location: :keep do true end
 				_ -> checks
-			end
+			end 
   	quote location: :keep do
      	unquote(attrs)
   		@silverb Silverb.send_data(__MODULE__)
@@ -55,7 +55,7 @@ defmodule Silverb do
 	Enum.reduce(lst, %{attrs: nil, checks: nil}, 
       fn
 	  {this_attr, this_expr}, %{attrs: nil, checks: nil} ->
-	  	this_value = Code.eval_quoted(this_expr) |> elem(0)
+	  	this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
         %{
           attrs:  quote location: :keep do
                     unquote(this_attr)
@@ -65,7 +65,7 @@ defmodule Silverb do
                   end
         }
       {this_attr, this_expr}, %{attrs: attrs, checks: checks} ->
-        this_value = Code.eval_quoted(this_expr) |> elem(0)
+        this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
         %{
           attrs:  quote location: :keep do
           			unquote(attrs)
@@ -139,7 +139,7 @@ defmodule Silverb.OnCompile do
 	@oncompile Silverb.maybe_create_priv
 	use Silverb, [ 
 					{@canged(:application.get_env(:silverb, :some)), :application.get_env(:silverb, :some)},
-					{@good(Enum.count([])), Enum.count([])} 
+					{@good(%{a: 1}), %{a: 1}} 
 				 ]
   	def test, do: {@canged, @good}
 end
