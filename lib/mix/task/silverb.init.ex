@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Silverb.Init do
 				"""
 				#!/bin/bash
 				while true; do
-					#{dir}rel/#{app}/bin/#{app} console
+					#{dir}/rel/#{app}/bin/#{app} console
 					sleep 0.2
 				done
 				""" 
