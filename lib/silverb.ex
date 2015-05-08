@@ -27,6 +27,10 @@ defmodule Silverb do
 				[deprecated: [], undefined: [], unused: []] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
 				some -> raise "#{__MODULE__} : found errors #{inspect some}"
 			end
+			case mod.silverb do
+				true -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} attrs are OK."
+				false -> raise "#{__MODULE__} : attrs are out of date, recompile module!"
+			end
 		end)
   end
 
@@ -35,22 +39,43 @@ defmodule Silverb do
   #
 
   defmacro __using__(lst) do
-    %{attrs: attrs, checks: checks} = Enum.reduce(lst, %{attrs: quote do end, checks: []}, 
-      fn(expr, %{attrs: attrs, checks: checks}) ->
+    %{attrs: attrs, checks: checks} = get_checks(lst)
+    body = 	case checks do
+				nil -> quote location: :keep do true end
+				_ -> checks
+			end
+  	quote location: :keep do
+     	unquote(attrs)
+  		@silverb Silverb.send_data(__MODULE__)
+  		def silverb, do: unquote(body)
+  	end
+  end
+
+  defp get_checks(lst) do
+	Enum.reduce(lst, %{attrs: nil, checks: nil}, 
+      fn
+	  {this_attr, this_expr}, %{attrs: nil, checks: nil} ->
+	  	this_value = Code.eval_quoted(this_expr) |> elem(0)
         %{
-          attrs:  quote do
-                    unquote(expr)
-                    #unquote(attr)(unquote(expr))
+          attrs:  quote location: :keep do
+                    unquote(this_attr)
                   end,
-          checks: []
+          checks: quote location: :keep do
+          			(unquote(this_value) == unquote(this_expr))
+                  end
+        }
+      {this_attr, this_expr}, %{attrs: attrs, checks: checks} ->
+        this_value = Code.eval_quoted(this_expr) |> elem(0)
+        %{
+          attrs:  quote location: :keep do
+          			unquote(attrs)
+                    unquote(this_attr)
+                  end,
+          checks: quote location: :keep do
+          			unquote(checks) and (unquote(this_value) == unquote(this_expr))
+                  end
         }
       end)
-  	res = quote location: :keep do
-      unquote(attrs)
-  		@silverb Silverb.send_data(__MODULE__)
-  	end
-    IO.puts Macro.to_string(res)
-    res
   end
 
 
@@ -112,6 +137,9 @@ end
 
 defmodule Silverb.OnCompile do
 	@oncompile Silverb.maybe_create_priv
-	use Silverb, [ @example2(Enum.count([])) ]
-  def test, do: @example2
+	use Silverb, [ 
+					{@canged(:application.get_env(:silverb, :some)), :application.get_env(:silverb, :some)},
+					{@good(Enum.count([])), Enum.count([])} 
+				 ]
+  	def test, do: {@canged, @good}
 end
