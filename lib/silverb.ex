@@ -18,7 +18,7 @@ defmodule Silverb do
 
   def check_modules do
   	IO.puts "#{__MODULE__} : checking modules ... "
-	Enum.each(:application.get_env(:silverb, :modules, nil), 
+	Enum.each("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term, 
 		fn(mod) ->
 			case :xref.m(mod) do
 				[deprecated: [], undefined: [], unused: []] -> IO.puts "#{__MODULE__} : module #{mod} is OK."
@@ -60,7 +60,7 @@ defmodule Silverb do
 			if not(File.exists?(dir)) do
 				:ok = File.mkdir_p!(dir)
 			end
-			file = dir<>"/silverb.txt"
+			file = dir<>"/silverb"
 			if not(File.exists?(file)) do
 				:ok = File.touch!(file)
 			end
