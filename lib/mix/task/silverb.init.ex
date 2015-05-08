@@ -18,7 +18,7 @@ defmodule Mix.Tasks.Silverb.Init do
 				[] = :os.cmd('chmod a+x ./start.sh')
 				"""
 				clean:
-					rm -rf #{:code.priv_dir(:silverb)}}/silverb
+					rm -rf #{:code.priv_dir(:silverb)}/silverb
 					mix clean
 					mix deps.clean --all
 					rm -rf ./_build
@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Silverb.Init do
 				[] = :os.cmd('chmod a+x ./start.sh')
 				"""
 				clean:
-					rm -rf #{:code.priv_dir(:silverb)}}/silverb
+					rm -rf #{:code.priv_dir(:silverb)}/silverb
 					mix clean
 					mix deps.clean --all
 					rm -rf ./_build
