@@ -1,0 +1,2 @@
+%{"conform": {:hex, :conform, "0.13.0"},
+  "exrm": {:git, "git://github.com/bitwalker/exrm.git", "bebc97c7707b6019a2790132b16653418f25afdc", []}}

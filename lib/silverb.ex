@@ -4,7 +4,10 @@ defmodule Silverb do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
-	check_modules
+    case File.exists?("#{:code.priv_dir(:silverb)}/silverb/off") do
+		true -> ReleaseManager.Utils.warn "#{__MODULE__} : swithed off, pass checks ..."
+		false -> check_modules
+    end
     children = [
       # Define workers and child supervisors to be supervised
       # worker(Silverb.Worker, [arg1, arg2, arg3])
@@ -17,18 +20,18 @@ defmodule Silverb do
   end
 
   def check_modules do
-  	IO.puts "#{__MODULE__} : checking modules ... "
+  	ReleaseManager.Utils.info "#{__MODULE__} : checking modules ... "
 	Enum.each("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term, 
 		fn(mod) ->
 			case :xref.m(mod) do
-				[deprecated: [], undefined: [], unused: []] -> IO.puts "#{__MODULE__} : module #{mod} is OK."
-				some -> raise "#{__MODULE__} : fonded errors #{inspect some}"
+				[deprecated: [], undefined: [], unused: []] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
+				some -> raise "#{__MODULE__} : found errors #{inspect some}"
 			end
 		end)
   end
 
   #
-  #	amazing getting modules names on compile time
+  #	in client side (modules)
   #
 
   defmacro __using__(_) do
@@ -38,9 +41,8 @@ defmodule Silverb do
   end
 
   def send_data(mod) do
-  	dir =  :code.priv_dir(:silverb) |> to_string
   	try do
-		:erlang.register(:silverb_worker, spawn fn() -> worker_func(dir<>"/silverb") end)
+		:erlang.register(:silverb_worker, spawn fn() -> worker_func end)
 	catch
 		_ -> :ok
 	rescue
@@ -54,31 +56,47 @@ defmodule Silverb do
 	end 
   end
 
-  defp worker_func(dir) do
+  #
+  #	in app
+  #
+
+  defp worker_func do
   	receive do
   		{:silverb, mod, pid} -> 
-			if not(File.exists?(dir)) do
-				:ok = File.mkdir_p!(dir)
-			end
-			file = dir<>"/silverb"
-			if not(File.exists?(file)) do
-				:ok = File.touch!(file)
-			end
-			case File.read!(file) do
-				"" -> write_to_file([mod], file)
-				bin -> write_to_file(Enum.uniq([mod|:erlang.binary_to_term(bin)]) , file)
-			end
+			file = to_string(:code.priv_dir(:silverb))<>"/silverb/silverb"
+			Enum.uniq([mod|(File.read!(file) |> :erlang.binary_to_term)])
+			|> write_to_file(file)
 			send(pid, {:silverb, :ok})
-  			worker_func(dir)
+  			worker_func
   	end
   end
 
-  defp write_to_file(lst, file) do
-  	data = :erlang.term_to_binary(lst)
+  def write_to_file(input, file) do
+  	data = 	case input do
+  				bin when is_binary(bin) -> bin
+  				term -> :erlang.term_to_binary(term)
+			end
   	{:ok, io} = :file.open(file, [:write])
   	:ok = :file.write(io, data)
   	:ok = :file.sync(io)
   	:ok = :file.close(io)
   end
 
+  def maybe_create_priv do
+	dir = to_string(:code.priv_dir(:silverb))<>"/silverb"
+	if not(File.exists?(dir)) do
+		:ok = File.mkdir_p!(dir)
+	end
+	file = dir<>"/silverb"
+	if not(File.exists?(file)) do
+		:ok = File.touch!(file)
+		write_to_file([], file)
+	end
+  end
+
+end
+
+defmodule Silverb.OnCompile do
+	@oncompile Silverb.maybe_create_priv
+	use Silverb
 end
