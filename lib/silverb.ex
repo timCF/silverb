@@ -26,4 +26,59 @@ defmodule Silverb do
 			end
 		end)
   end
+
+  #
+  #	amazing getting modules names on compile time
+  #
+
+  defmacro __using__(_) do
+	quote location: :keep do
+		@silverb Silverb.send_data(__MODULE__)
+	end
+  end
+
+  def send_data(mod) do
+  	dir =  :code.priv_dir(:silverb) |> to_string
+  	try do
+		:erlang.register(:silverb_worker, spawn fn() -> worker_func(dir<>"/silverb") end)
+	catch
+		_ -> :ok
+	rescue
+		_ -> :ok
+	end
+	send(:silverb_worker, {:silverb, mod, self})
+	receive do
+		{:silverb, :ok} -> :ok
+	after
+		1000 -> raise "#{mod} not received ans from silverb_worker"
+	end 
+  end
+
+  defp worker_func(dir) do
+  	receive do
+  		{:silverb, mod, pid} -> 
+			if not(File.exists?(dir)) do
+				:ok = File.mkdir_p!(dir)
+			end
+			file = dir<>"/silverb.txt"
+			if not(File.exists?(file)) do
+				:ok = File.touch!(file)
+			end
+			case File.read!(file) do
+				"" -> write_to_file([mod], file)
+				bin -> write_to_file(Enum.uniq([mod|:erlang.binary_to_term(bin)]) , file)
+			end
+			send(pid, {:silverb, :ok})
+  			worker_func(dir)
+  	end
+  end
+
+  defp write_to_file(lst, file) do
+  	data = :erlang.term_to_binary(lst)
+  	{:ok, io} = :file.open(file, [:write])
+  	:ok = :file.write(io, data)
+  	:ok = :file.sync(io)
+  	:ok = :file.close(io)
+  end
+
 end
