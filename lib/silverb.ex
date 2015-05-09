@@ -54,25 +54,25 @@ defmodule Silverb do
   defp get_checks(lst) do
 	Enum.reduce(lst, %{attrs: nil, checks: nil}, 
       fn
-	  {this_attr = <<"@",_::binary>>, this_expr}, %{attrs: nil, checks: nil} ->
-	  	this_value = Code.eval_quoted(this_expr) |> elem(0)
+	  {<<"@",this_attr::binary>>, this_expr}, %{attrs: nil, checks: nil} ->
+	  	this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
         %{
           attrs:  quote location: :keep do
-                    unquote(Code.string_to_quoted!("#{this_attr} #{inspect this_value}"))
+                    unquote({:@, [], [{String.to_atom(this_attr), [], [this_value] }]})
                   end,
           checks: quote location: :keep do
-          			(unquote(Macro.escape(this_value)) == unquote(this_expr))
+          			(unquote(this_value) == unquote(this_expr))
                   end
         }
-      {this_attr = <<"@",_::binary>>, this_expr}, %{attrs: attrs, checks: checks} ->
-        this_value = Code.eval_quoted(this_expr) |> elem(0)
+      {<<"@",this_attr::binary>>, this_expr}, %{attrs: attrs, checks: checks} ->
+        this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
         %{
           attrs:  quote location: :keep do
           			unquote(attrs)
-                    unquote(Code.string_to_quoted!("#{this_attr} #{inspect this_value}"))
+                    unquote({:@, [], [{String.to_atom(this_attr), [], [this_value] }]})
                   end,
           checks: quote location: :keep do
-          			unquote(checks) and (unquote(Macro.escape(this_value)) == unquote(this_expr))
+          			unquote(checks) and (unquote(this_value) == unquote(this_expr))
                   end
         }
       end)
