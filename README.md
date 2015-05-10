@@ -5,6 +5,7 @@ Now if one of module in your app contains some of this .. app will not even star
 - Calls of undefined or deprecated public functions from other modules
 - Outdated attributes
 
+Note : it works not only on your root app, but on all deps tree (where it used). It is very useful when compilation of apps depends on external configs..
 To use it in your module, write on top
 
 ```
