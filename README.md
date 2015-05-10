@@ -1,10 +1,9 @@
 Silverb
 =======
 
-Now if one of module in your app contains 
+Now if one of module in your app contains some of this .. app will not even start
 - Calls of undefined or deprecated public functions from other modules
 - Outdated attributes
-..It will not even start
 
 To use it in your module, write on top
 
@@ -52,6 +51,14 @@ Erlang/OTP 17 [erts-6.3.1] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe]
 ==> Elixir.Silverb : checking modules ...
 ==> Elixir.Silverb : module Elixir.Example is OK.
 ==> Elixir.Silverb : module Elixir.Example attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt.Example is OK.
+==> Elixir.Silverb : module Elixir.Myswt.Example attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt is OK.
+==> Elixir.Silverb : module Elixir.Myswt attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt.WebServer is OK.
+==> Elixir.Silverb : module Elixir.Myswt.WebServer attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt.Bullet is OK.
+==> Elixir.Silverb : module Elixir.Myswt.Bullet attrs are OK.
 ==> Elixir.Silverb : module Elixir.Silverb.OnCompile is OK.
 ==> Elixir.Silverb : module Elixir.Silverb.OnCompile attrs are OK.
 Interactive Elixir (1.0.3) - press Ctrl+C to exit (type h() ENTER for help)
@@ -75,7 +82,7 @@ Erlang/OTP 17 [erts-6.3.1] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe]
 ==> Elixir.Silverb : found errors [deprecated: [], undefined: [{{Example, :count, 1}, {Enummm, :count, 1}}], unused: []]
 ```
 
-Change some config for dependence :myswt
+Change some config for dependence Myswt, and it also fail on startup! Server port changed and module Myswt.WebServer is need to be recompiled now!
 ```
 config :myswt, app: :example, server_port: 9999, callback_module: Myswt.Example
 ```
@@ -88,10 +95,14 @@ Generated example.app
 ==> Elixir.Silverb : checking modules ...
 ==> Elixir.Silverb : module Elixir.Example is OK.
 ==> Elixir.Silverb : module Elixir.Example attrs are OK.
+==> Elixir.Silverb : module Elixir.Silverb.OnCompile is OK.
+==> Elixir.Silverb : module Elixir.Silverb.OnCompile attrs are OK.
 ==> Elixir.Silverb : module Elixir.Myswt.Example is OK.
 ==> Elixir.Silverb : module Elixir.Myswt.Example attrs are OK.
 ==> Elixir.Silverb : module Elixir.Myswt is OK.
 ==> Elixir.Silverb : module Elixir.Myswt attrs are OK.
 ==> Elixir.Silverb : module Elixir.Myswt.WebServer is OK.
-==> Elixir.Silverb : attrs are out of date, recompile module!
+==> Elixir.Silverb : attrs are out of date, recompile module Elixir.Myswt.WebServer!
 ```
+
+WARNING! If you are using Silverb in your module, attr @silverb and function &silverb/0 are reserved, not redefine them!
