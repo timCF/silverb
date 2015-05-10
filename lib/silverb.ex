@@ -25,11 +25,15 @@ defmodule Silverb do
 		fn(mod) ->
 			case :xref.m(mod) do
 				[deprecated: [], undefined: [], unused: _] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
-				some -> raise "#{__MODULE__} : found errors #{inspect some}"
+				some -> mess = "#{__MODULE__} : found errors #{inspect some}"
+						ReleaseManager.Utils.error mess
+						raise mess
 			end
 			case mod.silverb do
 				true -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} attrs are OK."
-				false -> raise "#{__MODULE__} : attrs are out of date, recompile module!"
+				false -> mess = "#{__MODULE__} : attrs are out of date, recompile module!"
+						 ReleaseManager.Utils.error mess
+						 raise mess
 			end
 		end)
   end
@@ -91,7 +95,9 @@ defmodule Silverb do
 	receive do
 		{:silverb, :ok} -> :ok
 	after
-		1000 -> raise "#{mod} not received ans from silverb_worker"
+		1000 -> mess = "#{mod} not received ans from silverb_worker"
+				ReleaseManager.Utils.error mess
+				raise mess
 	end 
   end
 
