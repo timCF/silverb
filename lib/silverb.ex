@@ -31,7 +31,7 @@ defmodule Silverb do
 			end
 			case mod.silverb do
 				true -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} attrs are OK."
-				false -> mess = "#{__MODULE__} : attrs are out of date, recompile module!"
+				false -> mess = "#{__MODULE__} : attrs are out of date, recompile module #{mod}!"
 						 ReleaseManager.Utils.error mess
 						 raise mess
 			end

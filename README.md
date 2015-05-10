@@ -24,10 +24,11 @@ In addition, there are some mix tasks to make your releases easier
 - mix silverb.off : swith off silverb
 - mix silverb.on : swith on silverb
 
-Let's check it works
+Let's check it works. Do simple module with deps
 
 ```
 config :example, bar: 111
+config :myswt, app: :example, server_port: 8081, callback_module: Myswt.Example
 ```
 ```
 defmodule Example do
@@ -46,6 +47,8 @@ Generated example.app
 $ iex -S mix
 Erlang/OTP 17 [erts-6.3.1] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
 
+2015-05-10 15:29:26.185 [debug] Elixir.Myswt : iced compilation ok.
+2015-05-10 15:29:26.621 [debug] HTTP MYSWT server started at port 8081
 ==> Elixir.Silverb : checking modules ...
 ==> Elixir.Silverb : module Elixir.Example is OK.
 ==> Elixir.Silverb : module Elixir.Example attrs are OK.
@@ -59,8 +62,36 @@ iex(1)> Example.get_attrs
 iex(2)>
 ```
 
-Now add this to module Example:
+Now add this to module Example, and app fail on startup
 
 ```
 def count(some), do: Enummm.count(some)
+```
+```
+$ iex -S mix
+Erlang/OTP 17 [erts-6.3.1] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
+
+==> Elixir.Silverb : checking modules ...
+==> Elixir.Silverb : found errors [deprecated: [], undefined: [{{Example, :count, 1}, {Enummm, :count, 1}}], unused: []]
+```
+
+Change some config for dependence :myswt
+```
+config :myswt, app: :example, server_port: 9999, callback_module: Myswt.Example
+```
+```
+$ iex -S mix
+Erlang/OTP 17 [erts-6.3.1] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false] [dtrace]
+
+Compiled lib/example.ex
+Generated example.app
+==> Elixir.Silverb : checking modules ...
+==> Elixir.Silverb : module Elixir.Example is OK.
+==> Elixir.Silverb : module Elixir.Example attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt.Example is OK.
+==> Elixir.Silverb : module Elixir.Myswt.Example attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt is OK.
+==> Elixir.Silverb : module Elixir.Myswt attrs are OK.
+==> Elixir.Silverb : module Elixir.Myswt.WebServer is OK.
+==> Elixir.Silverb : attrs are out of date, recompile module!
 ```
