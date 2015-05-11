@@ -25,11 +25,8 @@ defmodule Mix.Tasks.Silverb.Init do
 				release:
 					mix clean
 					mix deps.get
-					mix deps.compile exrm
-					mix deps.compile silverb
+					mix compile.protocols
 					mix silverb.on
-					mix deps.compile
-					mix compile
 					mix silverb.check
 					mix silverb.off
 					mix release.clean --implode
@@ -58,13 +55,9 @@ defmodule Mix.Tasks.Silverb.Init do
 				release:
 					mix clean
 					mix deps.get
-					mix deps.compile exrm
-					mix deps.compile silverb
-					mix silverb.on
-					mix deps.compile
-					mix compile
-					mix silverb.check
 					mix compile.protocols
+					mix silverb.on
+					mix silverb.check
 				"""
 				|> make_file(@makefile)
 			_ -> 
