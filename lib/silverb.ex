@@ -4,6 +4,7 @@ defmodule Silverb do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
+    File.write!("#{:code.priv_dir(:silverb)}/silverb/init_log.txt", Exutils.make_verbose_datetime<>"\n", [:append])
     case File.exists?("#{:code.priv_dir(:silverb)}/silverb/off") do
 		true -> ReleaseManager.Utils.warn "#{__MODULE__} : swithed off, pass checks ..."
 		false -> check_modules

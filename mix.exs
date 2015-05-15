@@ -15,7 +15,8 @@ defmodule Silverb.Mixfile do
     [applications: 	 [	
     				 	:logger,
     				 	:tools,
-    				 	:exrm
+    				 	:exrm,
+    				 	:exutils
     				 ],
      mod: {Silverb, []}]
   end
@@ -30,6 +31,9 @@ defmodule Silverb.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:exrm, github: "bitwalker/exrm"}]
+    [	
+    	{:exrm, github: "bitwalker/exrm"},
+    	{:exutils, github: "timCF/exutils"}
+    ]
   end
 end
