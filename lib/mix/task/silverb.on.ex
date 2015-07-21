@@ -3,8 +3,8 @@ defmodule Mix.Tasks.Silverb.On do
 	def run(_) do
 		case File.exists?(file) do
 			true ->  File.rm!(file)
-					 ReleaseManager.Utils.info("Silverb is ON, file #{file} deleted")
-			false -> ReleaseManager.Utils.info("Silverb is ON, file #{file} is not exist")
+					 Silverb.Console.notice("Silverb is ON, file #{file} deleted")
+			false -> Silverb.Console.notice("Silverb is ON, file #{file} is not exist")
 		end
 	end
 	defp file, do: "#{:code.priv_dir(:silverb)}/silverb/off"

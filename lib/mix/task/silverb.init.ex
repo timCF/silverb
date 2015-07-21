@@ -61,15 +61,15 @@ defmodule Mix.Tasks.Silverb.Init do
 				"""
 				|> make_file(@makefile)
 			_ -> 
-				ReleaseManager.Utils.warn "usage : \"mix silverb.init rel\" | \"mix silverb.init iex\""
+				Silverb.Console.warn("usage : \"mix silverb.init rel\" | \"mix silverb.init iex\"")
 		end
 	end
 	defp make_file(bin, fname) do
 		case File.exists?(fname) do
-			true ->  ReleaseManager.Utils.error "FAIL, #{inspect fname} file already exist"
+			true ->  Silverb.Console.error("FAIL, #{inspect fname} file already exist")
 			false -> File.touch!(fname)
 					 Silverb.write_to_file(bin, fname)
-					 ReleaseManager.Utils.info "SUCCESS, #{inspect fname} file created"
+					 Silverb.Console.notice("SUCCESS, #{inspect fname} file created")
 		end
 	end
 end

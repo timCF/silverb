@@ -1,12 +1,22 @@
 defmodule Silverb do
   use Application
+  defmodule Console do
+    def error(bin) do 
+      message(bin, IO.ANSI.red)
+      raise("#{__MODULE__} : #{bin}")
+    end
+    def warn(bin), do: message(bin, IO.ANSI.yellow)
+    def notice(bin), do: message(bin, IO.ANSI.cyan)
+    defp message(bin, color), do: IO.puts("#{IO.ANSI.bright}==> #{__MODULE__}#{IO.ANSI.reset} : #{color}#{bin}#{IO.ANSI.reset}")
+  end
+  @own_modules [Silverb, Silverb.Console, Silverb.OnCompile, Mix.Tasks.Silverb.Check, Mix.Tasks.Silverb.Init, Mix.Tasks.Silverb.Off, Mix.Tasks.Silverb.On]
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
     File.write!("#{:code.priv_dir(:silverb)}/silverb/init_log.txt", Exutils.make_verbose_datetime<>"\n", [:append])
     case File.exists?("#{:code.priv_dir(:silverb)}/silverb/off") do
-		true -> ReleaseManager.Utils.warn "#{__MODULE__} : swithed off, pass checks ..."
+		true -> Silverb.Console.warn("silverb swithed off, pass checks ...")
 		false -> check_modules
     end
     children = [
@@ -21,21 +31,19 @@ defmodule Silverb do
   end
 
   def check_modules do
-  	ReleaseManager.Utils.info "#{__MODULE__} : checking modules ... "
-	Enum.each("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term, 
+  	Silverb.Console.notice("checking modules ... ")
+	Enum.each(@own_modules++("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term), 
 		fn(mod) ->
 			case :xref.m(mod) do
-				[deprecated: [], undefined: [], unused: _] -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} is OK."
-				some -> mess = "#{__MODULE__} : found errors #{inspect some}"
-						ReleaseManager.Utils.error mess
-						raise mess
+				[deprecated: [], undefined: [], unused: _] -> Silverb.Console.notice("module #{mod} is OK.")
+				some -> Silverb.Console.error("found errors #{inspect some}")
 			end
-			case mod.silverb do
-				true -> ReleaseManager.Utils.debug "#{__MODULE__} : module #{mod} attrs are OK."
-				false -> mess = "#{__MODULE__} : attrs are out of date, recompile module #{mod}!"
-						 ReleaseManager.Utils.error mess
-						 raise mess
-			end
+      if not(mod in @own_modules) do
+  			case mod.silverb do
+  				true -> Silverb.Console.notice("module #{mod} attrs are OK.")
+  				false -> Silverb.Console.error("attrs are out of date, recompile module #{mod}!")
+  			end
+      end
 		end)
   end
 
@@ -86,20 +94,18 @@ defmodule Silverb do
 
   def send_data(mod) do
   	try do
-		:erlang.register(:silverb_worker, spawn fn() -> worker_func end)
-	catch
-		_ -> :ok
-	rescue
-		_ -> :ok
-	end
-	send(:silverb_worker, {:silverb, mod, self})
-	receive do
-		{:silverb, :ok} -> :ok
-	after
-		1000 -> mess = "#{mod} not received ans from silverb_worker"
-				ReleaseManager.Utils.error mess
-				raise mess
-	end 
+  		:erlang.register(:silverb_worker, spawn fn() -> worker_func end)
+  	catch
+  		_ -> :ok
+  	rescue
+  		_ -> :ok
+  	end
+  	send(:silverb_worker, {:silverb, mod, self})
+  	receive do
+  		{:silverb, :ok} -> :ok
+  	after
+  		3000 -> Silverb.Console.error("#{mod} not received ans from silverb_worker")
+  	end 
   end
 
   #
