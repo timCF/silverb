@@ -32,9 +32,18 @@ defmodule Silverb do
 
   def check_modules do
   	Silverb.Console.notice("checking modules ... ")
-	Enum.each(@own_modules++("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term), 
-		fn(mod) ->
-			case :xref.m(mod) do
+    modules_paths = File.read!("#{:code.priv_dir(:silverb)}/silverb/modules_paths") |> :erlang.binary_to_term
+    "#{:code.priv_dir(:silverb)}/silverb/silverb" 
+    |> File.read! 
+    |> :erlang.binary_to_term
+    |> Enum.each(fn(mod) -> 
+      if not(Map.has_key?(modules_paths, mod)) do
+        Silverb.Console.error("can't find path for module #{inspect mod}")
+      end
+    end)
+	Enum.each(modules_paths, 
+		fn({mod, path}) ->
+			case :xref.m(path) do
 				[deprecated: [], undefined: [], unused: _] -> Silverb.Console.notice("module #{mod} is OK.")
 				some -> Silverb.Console.error("found errors #{inspect some}")
 			end
@@ -154,5 +163,33 @@ defmodule Silverb.OnCompile do
 					{"@canged", :application.get_env(:silverb, :some)},
 					{"@good", %{a: 1}} 
 				 ]
-  	def test, do: {@canged, @good}
+  def test, do: {@canged, @good}
+  defp wait_for_module(module) do
+    case :code.which(module) do
+      :non_existing -> 
+        :timer.sleep(1000)
+        wait_for_module(module)
+      some ->
+        some
+    end
+  end
+  def compile_modules(last_lst) do
+    :timer.sleep(3500)
+    case File.read(to_string(:code.priv_dir(:silverb))<>"/silverb/silverb") do
+      {:ok, file} ->
+        case :erlang.binary_to_term(file) do
+          ^last_lst -> 
+            data = Enum.reduce(last_lst, %{}, &(Map.put(&2, &1, wait_for_module(&1)))) |> IO.inspect |> :erlang.term_to_binary
+            File.write!(to_string(:code.priv_dir(:silverb))<>"/silverb/modules_paths", data)
+          new_lst ->
+            compile_modules(new_lst)
+        end
+      _ ->
+        compile_modules(last_lst)
+    end
+  end
+end
+
+defmodule Silverb.OnCompile.Receiver do
+  @compile Silverb.OnCompile.compile_modules([])
 end
