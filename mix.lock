@@ -1,6 +1,14 @@
-%{"conform": {:hex, :conform, "0.13.0"},
+%{"bbmustache": {:hex, :bbmustache, "1.0.3"},
+  "conform": {:hex, :conform, "0.16.0"},
+  "erlware_commons": {:hex, :erlware_commons, "0.15.0"},
   "exactor": {:git, "https://github.com/sasa1977/exactor.git", "0467f8100bc735405d597dbf94996195eb31e0b6", [tag: "0467f8100bc735405d597dbf94996195eb31e0b6"]},
-  "exrm": {:git, "https://github.com/bitwalker/exrm.git", "bebc97c7707b6019a2790132b16653418f25afdc", [tag: "bebc97c7707b6019a2790132b16653418f25afdc"]},
+  "exrm": {:git, "https://github.com/bitwalker/exrm.git", "f24dda2487c1938e5c670ac49f3a2833a00b824d", []},
   "extask": {:git, "https://github.com/timCF/extask.git", "691cc1a515750bead8b81ed6c13cddbcf115d754", []},
-  "exutils": {:git, "https://github.com/timCF/exutils.git", "8a7806419f83656afa4aaf97c595597be9cdc67a", []},
-  "hashex": {:git, "https://github.com/timCF/hashex.git", "cc6b4307daa1ab18c94cdd33bf3cb8a3dab28b96", []}}
+  "exutils": {:git, "https://github.com/timCF/exutils.git", "375f7f39696df13762a2afa490e85c223149c76f", []},
+  "getopt": {:hex, :getopt, "0.8.2"},
+  "hashex": {:git, "https://github.com/timCF/hashex.git", "d10a5f3e724e7be016c9ff7420ef5eb3780c3dae", []},
+  "neotoma": {:hex, :neotoma, "1.7.3"},
+  "providers": {:hex, :providers, "1.4.1"},
+  "quickrand": {:hex, :quickrand, "1.5.0"},
+  "relx": {:hex, :relx, "3.5.0"},
+  "uuid": {:git, "https://github.com/okeuday/uuid.git", "24325ae6309d03897735c3a320aab6f74b189ab7", []}}

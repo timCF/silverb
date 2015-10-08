@@ -33,7 +33,7 @@ defmodule Silverb.Mixfile do
   defp deps do
     [	
     	{:exutils, github: "timCF/exutils"},
-      {:exrm, github: "bitwalker/exrm", tag: "bebc97c7707b6019a2790132b16653418f25afdc", override: true}
+      {:exrm, github: "bitwalker/exrm"}
     ]
   end
 end
