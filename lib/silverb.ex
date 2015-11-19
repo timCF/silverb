@@ -1,7 +1,7 @@
 defmodule Silverb do
   use Application
   defmodule Console do
-    def error(bin) do 
+    def error(bin) do
       message(bin, IO.ANSI.red)
       raise("#{__MODULE__} : #{bin}")
     end
@@ -33,7 +33,7 @@ defmodule Silverb do
   def check_modules do
     load_modules
     Silverb.Console.notice("checking modules ... ")
-  Enum.each(@own_modules++("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term), 
+  Enum.each(@own_modules++("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term),
     fn(mod) ->
       case :xref.m(mod) do
         [deprecated: [], undefined: [], unused: _] -> Silverb.Console.notice("module #{mod} is OK.")
@@ -52,16 +52,21 @@ defmodule Silverb do
   defp load_modules do
     Silverb.Console.notice("loading modules ... ")
     dir = (:os.cmd('pwd') |> to_string |> String.strip) <> @build_dir
-    File.ls!(dir) |> Enum.each(fn(app) -> 
+    File.ls!(dir) |> Enum.each(fn(app) ->
       dir_ebin = dir<>app<>"/ebin/"
       File.ls!(dir_ebin)
       |> Enum.filter(&(Regex.match?(~r/\.beam$/, &1)))
       |> Enum.map(&(Regex.replace(~r/(\.beam)$/, &1, fn(_,_) -> "" end)))
       |> Enum.each(fn(mod) ->
-        case String.to_char_list(dir_ebin<>mod) |> :code.load_abs do
-          {:module, this_module} -> Silverb.Console.notice("module #{this_module} loaded.")
-          error -> Silverb.Console.error("module #{inspect mod} loading error #{inspect error}.")
-        end
+		case String.to_atom(mod) |> Code.ensure_loaded? do
+			true ->
+				Silverb.Console.warn("module #{mod} already loaded.")
+			false ->
+				case String.to_char_list(dir_ebin<>mod) |> :code.load_abs do
+					{:module, this_module} -> Silverb.Console.notice("module #{this_module} loaded.")
+					error -> Silverb.Console.error("module #{inspect mod} loading error #{inspect error}.")
+				end
+		end
       end)
     end)
   end
@@ -75,7 +80,7 @@ defmodule Silverb do
     body =  case checks do
         nil -> quote location: :keep do true end
         _ -> checks
-      end 
+      end
     quote location: :keep do
       unquote(attrs)
       @silverb Silverb.send_data(__MODULE__)
@@ -84,7 +89,7 @@ defmodule Silverb do
   end
 
   defp get_checks(lst) do
-  Enum.reduce(lst, %{attrs: nil, checks: nil}, 
+  Enum.reduce(lst, %{attrs: nil, checks: nil},
       fn
     {<<"@",this_attr::binary>>, this_expr}, %{attrs: nil, checks: nil} ->
       this_value = Code.eval_quoted(this_expr) |> elem(0) |> Macro.escape
@@ -124,7 +129,7 @@ defmodule Silverb do
       {:silverb, :ok} -> :ok
     after
       3000 -> Silverb.Console.error("#{mod} not received ans from silverb_worker")
-    end 
+    end
   end
 
   #
@@ -133,7 +138,7 @@ defmodule Silverb do
 
   defp worker_func do
     receive do
-      {:silverb, mod, pid} -> 
+      {:silverb, mod, pid} ->
       file = to_string(:code.priv_dir(:silverb))<>"/silverb/silverb"
       Enum.uniq([mod|(File.read!(file) |> :erlang.binary_to_term)])
       |> write_to_file(file)
@@ -169,9 +174,9 @@ end
 
 defmodule Silverb.OnCompile do
   @oncompile Silverb.maybe_create_priv
-  use Silverb, [ 
+  use Silverb, [
           {"@canged", :application.get_env(:silverb, :some)},
-          {"@good", %{a: 1}} 
+          {"@good", %{a: 1}}
          ]
     def test, do: {@canged, @good}
 end
