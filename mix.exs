@@ -13,10 +13,9 @@ defmodule Silverb.Mixfile do
   # Type `mix help compile.app` for more information
   def application do
     [applications: 	 [
-    				 	:logger,
-    				 	:tools,
-    				 	:exutils,
-              :exrm
+						:logger,
+						:tools,
+						:exrm
     				 ],
      mod: {Silverb, []}]
   end
@@ -31,9 +30,6 @@ defmodule Silverb.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [
-    	{:exutils, github: "timCF/exutils"},
-      	{:exrm, github: "bitwalker/exrm", tag: "0.19.9"}
-    ]
+    [{:exrm, github: "bitwalker/exrm", tag: "0.19.9"}]
   end
 end

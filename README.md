@@ -20,6 +20,7 @@ In addition, there are some mix tasks to make your releases easier
 - mix silverb.init : init "Makefile" and "start.sh"
 - make release : will build, check and make release of your project
 - make clean : totally cleanup build
+- mix silverb.clean : clean temporary silverb file
 - mix silverb.check : execute checks (it also executes in start of app)
 - mix silverb.off : swith off silverb
 - mix silverb.on : swith on silverb

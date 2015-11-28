@@ -14,7 +14,6 @@ defmodule Silverb do
   # for more information on OTP Applications
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
-    File.write!("#{:code.priv_dir(:silverb)}/silverb/init_log.txt", Exutils.make_verbose_datetime<>"\n", [:append])
     case File.exists?("#{:code.priv_dir(:silverb)}/silverb/off") do
     true -> Silverb.Console.warn("silverb swithed off, pass checks ...")
     false -> check_modules
@@ -31,21 +30,23 @@ defmodule Silverb do
   end
 
   def check_modules do
+    maybe_create_priv
     load_modules
     Silverb.Console.notice("checking modules ... ")
   Enum.each(@own_modules++("#{:code.priv_dir(:silverb)}/silverb/silverb" |> File.read! |> :erlang.binary_to_term),
     fn(mod) ->
       case :xref.m(mod) do
-        [deprecated: [], undefined: [], unused: _] -> Silverb.Console.notice("module #{mod} is OK.")
+        [deprecated: [], undefined: [], unused: _] -> :ok
         some -> Silverb.Console.error("found errors #{inspect some}")
       end
       if not(mod in @own_modules) do
         case mod.silverb do
-          true -> Silverb.Console.notice("module #{mod} attrs are OK.")
+          true -> :ok
           false -> Silverb.Console.error("attrs are out of date, recompile module #{mod}!")
         end
       end
     end)
+  Silverb.Console.notice("modules and attrs are OK!")
   end
 
   @build_dir "/_build/dev/lib/"
@@ -59,11 +60,10 @@ defmodule Silverb do
       |> Enum.map(&(Regex.replace(~r/(\.beam)$/, &1, fn(_,_) -> "" end)))
       |> Enum.each(fn(mod) ->
 		case String.to_atom(mod) |> Code.ensure_loaded? do
-			true ->
-				Silverb.Console.warn("module #{mod} already loaded.")
+			true -> :ok
 			false ->
 				case String.to_char_list(dir_ebin<>mod) |> :code.load_abs do
-					{:module, this_module} -> Silverb.Console.notice("module #{this_module} loaded.")
+					{:module, _} -> :ok
 					error -> Silverb.Console.error("module #{inspect mod} loading error #{inspect error}.")
 				end
 		end
@@ -128,7 +128,7 @@ defmodule Silverb do
     receive do
       {:silverb, :ok} -> :ok
     after
-      3000 -> Silverb.Console.error("#{mod} not received ans from silverb_worker")
+      3000 -> Silverb.Console.error("#{mod} not received ans from silverb_worker maybe 'mix silverb.clean' will help")
     end
   end
 
@@ -162,11 +162,13 @@ defmodule Silverb do
   dir = to_string(:code.priv_dir(:silverb))<>"/silverb"
   if not(File.exists?(dir)) do
     :ok = File.mkdir_p!(dir)
+    Silverb.Console.notice("dir #{dir} created")
   end
   file = dir<>"/silverb"
   if not(File.exists?(file)) do
     :ok = File.touch!(file)
     write_to_file([], file)
+    Silverb.Console.notice("file #{file} created")
   end
   end
 
