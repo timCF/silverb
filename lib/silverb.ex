@@ -49,10 +49,9 @@ defmodule Silverb do
   Silverb.Console.notice("modules and attrs are OK!")
   end
 
-  @build_dir "/_build/dev/lib/"
   defp load_modules do
     Silverb.Console.notice("loading modules ... ")
-    dir = (:os.cmd('pwd') |> to_string |> String.strip) <> @build_dir
+    dir = (:os.cmd('pwd') |> to_string |> String.strip) <> "/_build/#{Mix.env}/lib/"
     File.ls!(dir) |> Enum.each(fn(app) ->
       dir_ebin = dir<>app<>"/ebin/"
       File.ls!(dir_ebin)
