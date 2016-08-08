@@ -1,8 +1,9 @@
-%{"bbmustache": {:hex, :bbmustache, "1.0.3"},
-  "conform": {:hex, :conform, "0.17.0"},
-  "erlware_commons": {:hex, :erlware_commons, "0.15.0"},
+%{"bbmustache": {:hex, :bbmustache, "1.0.4", "7ba94f971c5afd7b6617918a4bb74705e36cab36eb84b19b6a1b7ee06427aa38", [:rebar], []},
+  "cf": {:hex, :cf, "0.2.1", "69d0b1349fd4d7d4dc55b7f407d29d7a840bf9a1ef5af529f1ebe0ce153fc2ab", [:rebar3], []},
+  "conform": {:hex, :conform, "0.17.0", "e3610a337b7c44beb829f176cbb0795f78fe53a0183a524a04e0ebe0f76f9113", [:mix], [{:neotoma, "~> 1.7.3", [hex: :neotoma, optional: false]}]},
+  "erlware_commons": {:hex, :erlware_commons, "0.21.0", "a04433071ad7d112edefc75ac77719dd3e6753e697ac09428fc83d7564b80b15", [:rebar3], [{:cf, "0.2.1", [hex: :cf, optional: false]}]},
   "exrm": {:git, "https://github.com/bitwalker/exrm.git", "ba7596cdc9f303708d7279b223408c19219c2ca3", [tag: "0.19.9"]},
-  "getopt": {:hex, :getopt, "0.8.2"},
-  "neotoma": {:hex, :neotoma, "1.7.3"},
-  "providers": {:hex, :providers, "1.4.1"},
-  "relx": {:hex, :relx, "3.5.0"}}
+  "getopt": {:hex, :getopt, "0.8.2", "b17556db683000ba50370b16c0619df1337e7af7ecbf7d64fbf8d1d6bce3109b", [:rebar], []},
+  "neotoma": {:hex, :neotoma, "1.7.3", "d8bd5404b73273989946e4f4f6d529e5c2088f5fa1ca790b4dbe81f4be408e61", [:rebar], []},
+  "providers": {:hex, :providers, "1.6.0", "db0e2f9043ae60c0155205fcd238d68516331d0e5146155e33d1e79dc452964a", [:rebar3], [{:getopt, "0.8.2", [hex: :getopt, optional: false]}]},
+  "relx": {:git, "https://github.com/erlware/relx.git", "9168eab9d949cb5fb3fe09b9e73cf404295e97ff", [tag: "v3.20.0"]}}

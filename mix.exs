@@ -15,7 +15,8 @@ defmodule Silverb.Mixfile do
     [applications: 	 [
 						:logger,
 						:tools,
-						:exrm
+						:exrm,
+						:relx,
     				 ],
      mod: {Silverb, []}]
   end
@@ -29,7 +30,10 @@ defmodule Silverb.Mixfile do
   #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
   #
   # Type `mix help deps` for more examples and options
-  defp deps do
-    [{:exrm, github: "bitwalker/exrm", tag: "0.19.9"}]
-  end
+	defp deps do
+		[
+			{:exrm, github: "bitwalker/exrm", tag: "0.19.9"},
+			{:relx, github: "erlware/relx", tag: "v3.20.0", override: true},
+		]
+	end
 end
